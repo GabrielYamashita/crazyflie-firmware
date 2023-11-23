@@ -44,6 +44,7 @@ int main() {
     ) {
         if (flag) {
             flag = false;
+            tempo = tim.read();
 
             att_est.estimate();
             ver_est.predict(ver_cont.f_t);
