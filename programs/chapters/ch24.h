@@ -40,7 +40,7 @@ int main() {
     while (
         abs(att_est.phi) <= pi/4.0 && abs(att_est.theta) <= pi/4.0 && 
         abs(att_est.p) <= 4.0*pi && abs(att_est.q) <= 4.0*pi && abs(att_est.r) <= 4.0*pi && 
-        tempo < 10.0
+        tempo < 45.0
     ) {
         if (flag) {
             flag = false;
