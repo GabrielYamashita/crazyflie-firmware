@@ -9,10 +9,7 @@ class AttitudeController {
     public:
         AttitudeController();
         void control(
-            float phi_r, float theta_r, float psi_r, 
-            float phi, float theta, float psi, 
-            float p, float q, float r
-        );
+            float phi_r, float theta_r, float psi_r, float phi, float theta, float psi, float p, float q, float r);
         float tau_phi, tau_theta, tau_psi;
 
     private:

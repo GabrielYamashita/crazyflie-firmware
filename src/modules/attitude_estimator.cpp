@@ -4,29 +4,22 @@
 
 // Constructor
 AttitudeEstimator::AttitudeEstimator() : imu(IMU_SDA, IMU_SCL) {
-    phi, theta, psi = 0; // euler angles [rad]
-    p, q, r = 0; // angular velocities [rad/s]
-    p_bias, q_bias, r_bias = 0;
+    phi, theta, psi = 0.0; // euler angles [rad]
+    p, q, r = 0.0; // angular velocities [rad/s]
+    p_bias, q_bias, r_bias = 0.0;
 }
 
 // Initialize Class
 void AttitudeEstimator::init() {
     imu.init();
-
-    float sum_p, sum_q, sum_r;
+    wait(1.0);
     for (int i = 0; i < 500; i++) {
         imu.read();
-
-        sum_p += imu.gx;
-        sum_q += imu.gy;
-        sum_r += imu.gz;
-
+        p_bias += imu.gx/500.0;
+        q_bias += imu.gy/500.0;
+        r_bias += imu.gz/500.0;
         wait(dt);
     }
-
-    p_bias = sum_p/500.0;
-    q_bias = sum_q/500.0;
-    r_bias = sum_r/500.0;
 }
 
 // estimate euler angles [rad] and angular velocity [rad/s]
@@ -39,15 +32,14 @@ void AttitudeEstimator::estimate() {
     q = imu.gy - q_bias;
     r = imu.gz - r_bias;
 
-
     // 
-    float phi_g = phi + (p + sin(phi)*tan(theta)*q + cos(phi)*tan(theta)*r)*dt;
+    float phi_g = phi + ( p + sin(phi)*tan(theta)*q + cos(phi)*tan(theta)*r )*dt;
     float phi_a = atan2(-imu.ay, -imu.az);
 
-    float theta_g = theta + (cos(phi)*q - sin(phi)*r)*dt;
-    float theta_a = atan2(imu.ax, -((imu.az > 0) - (imu.az < 0)) * sqrt(pow(imu.ay, 2) + pow(imu.az, 2)));
+    float theta_g = theta + ( cos(phi)*q - sin(phi)*r )*dt;
+    float theta_a = atan2( imu.ax, -( (imu.az > 0.0) - (imu.az < 0.0) ) * sqrt( pow(imu.ay, 2) + pow(imu.az, 2) ) );
 
-    float psi_g = psi + (sin(phi) * (1.0/cos(theta)) * q + cos(phi) * (1.0/cos(theta)) * r)*dt;
+    float psi_g = psi + ( sin(phi)*cos(theta)*q + cos(phi)*cos(theta)*r )*dt;
 
     // Estimação de Altitude
     phi = (1.0-alfa) * phi_g + alfa*phi_a;

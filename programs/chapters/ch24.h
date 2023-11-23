@@ -1,3 +1,4 @@
+
 #include "mbed.h"
 #include "crazyflie.h"
 
@@ -6,29 +7,40 @@ AttitudeEstimator att_est;
 AttitudeController att_cont;
 VerticalEstimator ver_est;
 VerticalController ver_cont;
+HorizontalEstimator hor_est;
+HorizontalController hor_cont;
 
 Ticker tic, tic_range;
 bool flag, flag_range;
+
 void callback() { flag = true; }
 void callback_range() { flag_range = true; }
 
+Timer tim;
+float tempo;
+
 int main() {
-    float z_r = 0.5;
-    float phi_r = 0.0;
-    float theta_r = 0.0;
+    float z_r = 0.65;
+    float x_r = 0.0;
+    float y_r = 0.0;
     float psi_r = 0.0;
 
     att_est.init();
     ver_est.init();
+    hor_est.init();
 
     tic.attach(&callback, dt);
     tic_range.attach(&callback_range, dt_range);
 
     mixer.arm();
 
-    while(
+    tim.start();
+    tempo = tim.read();
+
+    while (
         abs(att_est.phi) <= pi/4.0 && abs(att_est.theta) <= pi/4.0 && 
-        abs(att_est.p) <= pi*4.0 && abs(att_est.q) <= pi*4.0 && abs(att_est.r) <= pi*4.0 
+        abs(att_est.p) <= 4.0*pi && abs(att_est.q) <= 4.0*pi && abs(att_est.r) <= 4.0*pi && 
+        tempo < 10.0
     ) {
         if (flag) {
             flag = false;
@@ -41,12 +53,19 @@ int main() {
                 ver_est.correct(att_est.phi, att_est.theta);
             }
 
+            hor_est.predict(att_est.phi, att_est.theta);
+
+            if (ver_est.z >= 0.05) {
+                hor_est.correct(att_est.phi, att_est.theta, att_est.p, att_est.q, ver_est.z);
+                hor_cont.control(x_r, y_r, hor_est.x, hor_est.y, hor_est.u, hor_est.v);
+            }
+
             ver_cont.control(z_r, ver_est.z, ver_est.w);
-            att_cont.control(phi_r, theta_r, psi_r, att_est.phi, att_est.theta, att_est.psi, att_est.p, att_est.q, att_est.r);
+            att_cont.control(hor_cont.phi_r, hor_cont.theta_r, psi_r, att_est.phi, att_est.theta, att_est.psi, att_est.p, att_est.q, att_est.r);
             mixer.actuate(ver_cont.f_t/(cos(att_est.phi) * cos(att_est.theta)), att_cont.tau_phi, att_cont.tau_theta, att_cont.tau_psi);
         }
     }
     mixer.disarm();
     while (true);
-
 }
+

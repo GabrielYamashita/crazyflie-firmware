@@ -27,9 +27,7 @@ void Mixer::actuate(float ft, float tauPhi, float tauTheta, float tauPsi) {
     else {
         notArmed();
         
-        while(true) {
-            
-        }
+        while(true);
     }
 }
 
@@ -48,35 +46,6 @@ void Mixer::actuate(float ft, float tauPhi, float tauTheta, float tauPsi, int ti
         while(true);
     }
 }
-
-// Pisca o Led
-// void Mixer::blinkLED(char color, char side, int time) {
-//     if (color == 'R' || color == 'r') {
-//         if (side == 'L' || side == 'l') {
-//             ledRL = !ledRL;
-//             wait(time);
-//             ledRL = !ledRL;
-//         }
-//         else if (side == 'R' || side == 'r') {
-//             ledRR = !ledRR;
-//             wait(time);
-//             ledRR = !ledRR;
-//         }
-//     }
-
-//     else if (color == 'G' || color == 'g') {
-//         if (side == 'L' || side == 'l') {
-//             ledGL = !ledGL;
-//             wait(time);
-//             ledGL = !ledGL;
-//         }
-//         else if (side == 'R' || side == 'r') {
-//             ledGR = !ledGR;
-//             wait(time);
-//             ledGR = !ledGR;
-//         }
-//     }
-// }
 
 // Aviso do Drone de não Armado
 void Mixer::notArmed() {
@@ -175,18 +144,22 @@ void Mixer::disarm() {
 
 // Calcula Saída dos Ômegas
 void Mixer::mixer(float ft, float tauPhi, float tauTheta, float tauPsi) {
-    //omega_1
-    omega_1 = (1/(4*kl))*ft - (1/(4*kl*l))*tauPhi - (1/(4*kl*l))*tauTheta - (1/(4*kd))*tauPsi;
-    if (omega_1 < 0){
+    omega_1 = (1.0/(4.0*kl))*ft - (1.0/(4.0*kl*l))*tauPhi - (1.0/(4.0*kl*l))*tauTheta - (1.0/(4.0*kd))*tauPsi;
+    omega_2 = (1.0/(4.0*kl))*ft - (1.0/(4.0*kl*l))*tauPhi + (1.0/(4.0*kl*l))*tauTheta + (1.0/(4.0*kd))*tauPsi;
+    omega_3 = (1.0/(4.0*kl))*ft + (1.0/(4.0*kl*l))*tauPhi + (1.0/(4.0*kl*l))*tauTheta - (1.0/(4.0*kd))*tauPsi;
+    omega_4 = (1.0/(4.0*kl))*ft + (1.0/(4.0*kl*l))*tauPhi - (1.0/(4.0*kl*l))*tauTheta + (1.0/(4.0*kd))*tauPsi;
+
+
+    // omega_1
+    if (omega_1 < 0.0) {
         omega_1 = 0.0;
     }
     else {
         omega_1 = sqrt(omega_1);
     }
 
-    //omega_2
-    omega_2 = (1/(4*kl))*ft - (1/(4*kl*l))*tauPhi + (1/(4*kl*l))*tauTheta + (1/(4*kd))*tauPsi;
-    if (omega_2 < 0){
+    // omega_2
+    if (omega_2 < 0.0){
         omega_2 = 0.0;
     }
     else {
@@ -194,8 +167,7 @@ void Mixer::mixer(float ft, float tauPhi, float tauTheta, float tauPsi) {
     }
 
     //omega_3
-    omega_3 = (1/(4*kl))*ft + (1/(4*kl*l))*tauPhi + (1/(4*kl*l))*tauTheta - (1/(4*kd))*tauPsi;
-    if (omega_3 < 0){
+    if (omega_3 < 0.0){
         omega_3 = 0.0;
     }
     else {
@@ -203,12 +175,11 @@ void Mixer::mixer(float ft, float tauPhi, float tauTheta, float tauPsi) {
     }
 
     //omega_4
-    omega_4 = (1/(4*kl))*ft + (1/(4*kl*l))*tauPhi - (1/(4*kl*l))*tauTheta + (1/(4*kd))*tauPsi;
-    if (omega_4 < 0){
+    if (omega_4 < 0.0){
         omega_4 = 0.0;
     }
     else {
-        omega_4= sqrt(omega_4);
+        omega_4 = sqrt(omega_4);
     }
 }
 

@@ -13,7 +13,7 @@ void VerticalEstimator::predict(float f_t) {
     z = z + w*dt;
 
     if (z > 0.05) {
-        w = w + (-g + f_t/m)*dt;
+       w = w + ( f_t/m - g )*dt;
     }
 }
 
